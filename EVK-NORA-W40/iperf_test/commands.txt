@@ -1,0 +1,51 @@
+Binary files: 
+
+Name                                        Address
+C:\Firmwares\NORA-W40\bootloader.bin        0x0
+C:\Firmwares\NORA-W40\partition-table.bin   0x8000
+C:\Firmwares\NORA-W40\iperf_test.bin        0x10000
+
+*****************************************************************
+Module access point
+ap ubx_text 12345678
+iperf -s
+or
+iperf -s -u -p 5001 -i 5 -t 20 -b 30
+
+
+Module station
+sta ubx_text 12345678
+iperf -c 192.168.4.1
+or
+iperf -c 192.168.4.1 -u -p 5001 -i 5 -t 20 -b 30
+
+iperf [-suVa] [-c <ip>] [-p <port>] [-l <length>] [-i <interval>] [-t <time>] [-b <bandwidth>]
+
+*****************************************************************
+Access point
+restart
+heap
+free
+ap ubx_text 12345678
+iperf -s -u -p 5001 -i 5 -t 20 -b 30
+
+
+Station (EVB#3)
+restart
+heap
+free
+sta ubx_text 12345678
+iperf -c 192.168.4.1 -u -p 5001 -i 5 -t 20 -b 30
+
+iperf  [-suVa] [-c <ip>] [-p <port>] [-l <length>] [-i <interval>] [-t <time>] [-b <bandwidth>]
+  iperf command
+  -c, --client=<ip>  run in client mode, connecting to <host>
+  -s, --server  run in server mode
+     -u, --udp  use UDP rather than TCP
+  -V, --ipv6_domain  use IPV6 address rather than IPV4
+  -p, --port=<port>  server port to listen on/connect to
+  -l, --len=<length>  Set read/write buffer size
+  -i, --interval=<interval>  seconds between periodic bandwidth reports
+  -t, --time=<time>  time in seconds to transmit for (default 10 secs)
+  -b, --bandwidth=<bandwidth>  bandwidth to send at in Mbits/sec
+   -a, --abort  abort running iperf
