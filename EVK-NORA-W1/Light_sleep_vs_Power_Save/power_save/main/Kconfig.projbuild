@@ -1,0 +1,215 @@
+menu "Application Configuration"
+
+    menu "Wi-Fi Settings"
+        config EVK_WIFI_SSID
+            string "WiFi SSID"
+            default "myssid"
+            help
+                SSID (network name) for the application to connect to.
+
+        config EVK_WIFI_PASSWORD
+            string "WiFi Password"
+            default "mypassword"
+            help
+                WiFi password (WPA or WPA2) for the example to use.
+
+        config EVK_WIFI_LISTEN_INTERVAL
+            int "WiFi listen interval"
+            default 3
+            help
+                Interval for station to listen to beacon from AP. The unit of listen interval is one beacon interval.
+                For example, if beacon interval is 100 ms and listen interval is 3, the interval for station to listen
+                to beacon is 300 ms.
+
+        config EVK_WIFI_BEACON_TIMEOUT
+            int "WiFi beacon timeout"
+            default 6
+            range 6 30
+            help
+                For Station, If the station does not receive a beacon frame from the connected SoftAP during the
+                inactive time, disconnect from SoftAP. Default 6s.
+        
+        config EVK_MAXIMUM_RETRY
+            int "Maximum retry"
+            default 5
+            help
+                Set the Maximum retry to avoid station reconnecting to the AP unlimited when the AP is really inexistent.
+
+        choice EVK_WIFI_SCAN_AUTH_MODE_THRESHOLD
+            prompt "WiFi Scan auth mode threshold"
+            default ESP_WIFI_AUTH_OPEN
+            help
+                The weakest authmode to accept in the scan mode.
+
+            config EVK_WIFI_AUTH_OPEN
+                bool "OPEN"
+            config EVK_WIFI_AUTH_WEP
+                bool "WEP"
+            config EVK_WIFI_AUTH_WPA_PSK
+                bool "WPA PSK"
+            config EVK_WIFI_AUTH_WPA2_PSK
+                bool "WPA2 PSK"
+            config EVK_WIFI_AUTH_WPA_WPA2_PSK
+                bool "WPA/WPA2 PSK"
+            config EVK_WIFI_AUTH_WPA3_PSK
+                bool "WPA3 PSK"
+            config EVK_WIFI_AUTH_WPA2_WPA3_PSK
+                bool "WPA2/WPA3 PSK"
+            config EVK_WIFI_AUTH_WAPI_PSK
+                bool "WAPI PSK"
+        endchoice
+    endmenu
+
+    menu "TCP connection Settings"
+        choice EXAMPLE_IP_MODE
+            prompt "IP Version"
+            depends on EXAMPLE_SOCKET_IP_INPUT_STRING
+            help
+                Example can use either IPV4 or IPV6.
+    
+            config EXAMPLE_IPV4
+                bool "IPV4"
+    
+            config EXAMPLE_IPV6
+                bool "IPV6"
+    
+        endchoice
+    
+        config EXAMPLE_IPV4_ADDR
+            string "IPV4 Address"
+            default "192.168.0.165"
+            depends on EXAMPLE_IPV4
+            help
+                The example will connect to this IPV4 address.
+    
+        config EXAMPLE_IPV6_ADDR
+            string "IPV6 Address"
+            default "FE80::30AD:E57B:C212:68AD"
+            depends on EXAMPLE_IPV6
+            help
+                The example will connect to this IPV6 address.
+    
+        config EXAMPLE_PORT
+            int "Port"
+            range 0 65535
+            default 8080
+            help
+                The remote port to which the client example will connect to.
+    
+        choice EXAMPLE_INTERFACE
+            prompt "Interface selection"
+            depends on EXAMPLE_IPV6
+            help
+                Example can use either "Auto" or "User specified".
+    
+            config EXAMPLE_IFACE_AUTO
+                bool "Auto"
+    
+            config EXAMPLE_USER_SPECIFIED_IFACE
+                bool "User specified interface"
+        endchoice
+    
+        config EXAMPLE_USER_SPECIFIED_IFACE_NAME
+            string "User specified interface name"
+            default "st1"
+            depends on EXAMPLE_USER_SPECIFIED_IFACE
+            help
+                This interface will be used for communication.
+    
+        choice EXAMPLE_SOCKET_IP_INPUT
+            prompt "Socket example source"
+            default EXAMPLE_SOCKET_IP_INPUT_STRING
+            help
+                Selects the input source of the IP used in the example.
+    
+            config EXAMPLE_SOCKET_IP_INPUT_STRING
+                bool "From string"
+    
+            config EXAMPLE_SOCKET_IP_INPUT_STDIN
+                bool "From stdin"
+        endchoice
+    endmenu
+
+    menu "Power Save Settings"
+        choice EVK_POWER_SAVE_MODE
+            prompt "power save mode"
+            default EVK_POWER_SAVE_MIN_MODEM
+            help
+                Power save mode for the esp32 to use. Modem sleep mode includes minimum and maximum power save modes.
+                In minimum power save mode, station wakes up every DTIM to receive beacon. Broadcast data will not be
+                lost because it is transmitted after DTIM. However, it can not save much more power if DTIM is short
+                for DTIM is determined by AP.
+                In maximum power save mode, station wakes up every listen interval to receive beacon. Broadcast data
+                may be lost because station may be in sleep state at DTIM time. If listen interval is longer, more power
+                is saved but broadcast data is more easy to lose.
+
+            config EVK_POWER_SAVE_NONE
+                bool "none"
+            config EVK_POWER_SAVE_MIN_MODEM
+                bool "minimum modem"
+            config EVK_POWER_SAVE_MAX_MODEM
+                bool "maximum modem"
+        endchoice
+
+        choice EVK_MAX_CPU_FREQ
+            prompt "Maximum CPU frequency"
+            default EVK_MAX_CPU_FREQ_80
+            depends on PM_ENABLE
+            help
+                Maximum CPU frequency to use for dynamic frequency scaling.
+
+            config EVK_MAX_CPU_FREQ_80
+                bool "80 MHz"
+            config EVK_MAX_CPU_FREQ_120
+                bool "120 MHz"
+                depends on IDF_TARGET_ESP32C2
+            config EVK_MAX_CPU_FREQ_160
+                bool "160 MHz"
+                depends on !IDF_TARGET_ESP32C2
+            config EVK_MAX_CPU_FREQ_240
+                bool "240 MHz"
+                depends on IDF_TARGET_ESP32 || IDF_TARGET_ESP32S2 || IDF_TARGET_ESP32S3
+        endchoice
+
+        config EVK_MAX_CPU_FREQ_MHZ
+            int
+            default 80 if EVK_MAX_CPU_FREQ_80
+            default 120 if EVK_MAX_CPU_FREQ_120
+            default 160 if EVK_MAX_CPU_FREQ_160
+            default 240 if EVK_MAX_CPU_FREQ_240
+
+        choice EVK_MIN_CPU_FREQ
+            prompt "Minimum CPU frequency"
+            default EVK_MIN_CPU_FREQ_10M
+            depends on PM_ENABLE
+            help
+                Minimum CPU frequency to use for dynamic frequency scaling.
+                Should be set to XTAL frequency or XTAL frequency divided by integer.
+
+            config EVK_MIN_CPU_FREQ_40M
+                bool "40 MHz (use with 40MHz XTAL)"
+                depends on XTAL_FREQ_40 || XTAL_FREQ_AUTO
+            config EVK_MIN_CPU_FREQ_20M
+                bool "20 MHz (use with 40MHz XTAL)"
+                depends on XTAL_FREQ_40 || XTAL_FREQ_AUTO
+            config EVK_MIN_CPU_FREQ_10M
+                bool "10 MHz (use with 40MHz XTAL)"
+                depends on XTAL_FREQ_40 || XTAL_FREQ_AUTO
+            config EVK_MIN_CPU_FREQ_26M
+                bool "26 MHz (use with 26MHz XTAL)"
+                depends on XTAL_FREQ_26 || XTAL_FREQ_AUTO
+            config EVK_MIN_CPU_FREQ_13M
+                bool "13 MHz (use with 26MHz XTAL)"
+                depends on XTAL_FREQ_26 || XTAL_FREQ_AUTO
+        endchoice
+
+        config EVK_MIN_CPU_FREQ_MHZ
+            int
+            default 40 if EVK_MIN_CPU_FREQ_40M
+            default 20 if EVK_MIN_CPU_FREQ_20M
+            default 10 if EVK_MIN_CPU_FREQ_10M
+            default 26 if EVK_MIN_CPU_FREQ_26M
+            default 13 if EVK_MIN_CPU_FREQ_13M
+    endmenu
+    
+endmenu
